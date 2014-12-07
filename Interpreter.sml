@@ -87,6 +87,13 @@ fun evalBinopNum ( bop, IntVal n1, IntVal n2, pos ) =
   | evalBinopNum ( bop, e1, e2, pos ) =
     invalidOperands [(Int, Int)] e1 e2 pos
 
+
+fun evalBinopBool ( bop, BoolVal n1, BoolVal n2, pos ) =
+    BoolVal (bop(n1,n2))
+  | evalBinopBool ( bop, e1, e2, pos ) =
+    invalidOperands [(Bool, Bool)] e1 e2 pos
+
+
 fun evalEq ( IntVal n1,     IntVal n2,     pos ) =
     BoolVal (n1=n2)
   | evalEq ( BoolVal b1,     BoolVal b2,     pos ) =
@@ -208,13 +215,13 @@ fun evalExp ( Constant (v,_), vtab, ftab ) = v
   | evalExp ( And(e1, e2, pos), vtab, ftab ) =
         let val res1   = evalExp(e1, vtab, ftab)
             val res2   = evalExp(e2, vtab, ftab)
-        in  evalRelop(andalso, res1, res2, pos)
+        in  evalBinopBool((fn (n1, n2) => n1 andalso n2), res1, res2, pos)
         end
 
   | evalExp ( Or(e1, e2, pos), vtab, ftab ) =
         let val res1   = evalExp(e1, vtab, ftab)
             val res2   = evalExp(e2, vtab, ftab)
-        in  evalRelop(orelse, res1, res2, pos)
+        in  evalBinopBool((fn (n1, n2) => n1 orelse n2), res1, res2, pos)
         end
 
   | evalExp ( Equal(e1, e2, pos), vtab, ftab ) =
