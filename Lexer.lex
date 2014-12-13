@@ -60,6 +60,8 @@ rule Token = parse
                           lineStartPos :=  getLexemeStart lexbuf
                            :: !lineStartPos;
                           Token lexbuf } (* newlines *)
+  | "true"              { Parser.BOOLLIT (true, getPos lexbuf)}
+  | "false"             { Parser.BOOLLIT (false, getPos lexbuf)}
   | [`0`-`9`]+          { case Int.fromString (getLexeme lexbuf) of
                                NONE   => lexerError lexbuf "Bad integer"
                              | SOME i => Parser.NUM (i, getPos lexbuf) }

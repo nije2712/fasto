@@ -302,7 +302,7 @@ and checkExp ftab vtab (exp : In.Exp)
             else (Bool,
                   Out.All (arr', pos))
         end 
-
+     | _ => raise Error("type checker failed", (0,0))
   (* TODO TASK 1: add case for constant booleans (True/False). *)
 
   (* TODO TASK 1: add cases for Times, Divide, Negate, Not, And, Or.  Look at

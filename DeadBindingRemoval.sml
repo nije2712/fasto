@@ -7,6 +7,8 @@ structure DeadBindingRemoval = struct
 open Fasto
 open Fasto.KnownTypes
 
+exception Error of string * pos
+
 type Usages = string list
 
 fun isUsed name usages = List.exists (fn x => x = name) usages
@@ -179,6 +181,7 @@ fun removeDeadBindingsInExp e =
         let val (_, uses, e') = removeDeadBindingsInExp e
         in (true, uses, Write (e', t, pos))
         end
+      | _ => raise Error("Error in DeadBindingRemoval", (0,0))
 and removeDeadBindingsInFunArg (FunName fname) =
     (false, [], FunName fname)
   | removeDeadBindingsInFunArg (Lambda (rettype, params, body, pos)) =

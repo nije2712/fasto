@@ -9,6 +9,8 @@ structure Inlining = struct
 open Fasto
 open Fasto.KnownTypes
 
+exception Error of string * pos
+
 fun inlineInExp graph prog e =
     case e of
         Constant _ => e
@@ -98,7 +100,7 @@ fun inlineInExp graph prog e =
         Read (t, pos)
       | Write (e, t, pos) =>
         Write (inlineInExp graph prog e, t, pos)
-
+      | _ => raise Error("Error in Inlining", (0,0))
 and inlineInFunArg graph prog (Lambda (rettype, params, body, pos)) =
     Lambda (rettype, params, inlineInExp graph prog body, pos)
   | inlineInFunArg graph prog (FunName fname) =

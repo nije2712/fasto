@@ -167,7 +167,9 @@ structure CodeGen = struct
           [ Mips.LUI (place, makeConst (n div 65536))
           , Mips.ORI (place, place, makeConst (n mod 65536)) ]
     | Constant (CharVal c, pos) => [ Mips.LI (place, makeConst (ord c)) ]
-
+    | Constant (BoolVal b, pos) => (case b of
+                                   true => [ Mips.LI (place, makeConst 1) ]
+                                |  false => [ Mips.LI (place, makeConst 0) ])
     (* Create/return a label here, collect all string literals of the program
        (in stringTable), and create them in the data section before the heap
        (Mips.ASCIIZ) *)
@@ -233,7 +235,8 @@ structure CodeGen = struct
             val code2 = compileExp e2 vtable t2
         in  code1 @ code2 @ [Mips.SUB (place,t1,t2)]
         end
-
+    | Filter _ => raise Error("Filter is not yet implemented", (0,0))
+    | Scan _ => raise Error("Scan is not yet implemented", (0,0))
     | Times (e1, e2, pos) =>
         let val t1 = newName "times_L"
             val t2 = newName "times_R"
@@ -241,7 +244,36 @@ structure CodeGen = struct
             val code2 = compileExp e2 vtable t2
         in  code1 @ code2 @ [Mips.MUL (place,t1,t2)]
         end
-
+    | Divide (e1, e2, pos) =>
+        let val t1 = newName "divide_L"
+            val t2 = newName "divide_R"
+            val code1 = compileExp e1 vtable t1
+            val code2 = compileExp e2 vtable t2
+        in  code1 @ code2 @ [Mips.DIV (place,t1,t2)]
+        end
+    | And (e1, e2, pos) =>
+        let val t1 = newName "and_L"
+            val t2 = newName "and_R"
+            val code1 = compileExp e1 vtable t1
+            val code2 = compileExp e2 vtable t2
+        in  code1 @ code2 @ [Mips.AND (place,t1,t2)]
+        end
+    | Or (e1, e2, pos) =>
+        let val t1 = newName "or_L"
+            val t2 = newName "or_R"
+            val code1 = compileExp e1 vtable t1
+            val code2 = compileExp e2 vtable t2
+        in  code1 @ code2 @ [Mips.OR (place,t1,t2)]
+        end
+    | Not _ => raise Error("Not is not yet implemented", (0,0))
+(*
+    | Negate (e1, pos) =>
+        let val t1 = newName "negate"
+            val code1 = compileExp e1 vtable t1
+        in  code1 @ [Mips.SUB (place,t1,t2)]
+        end
+*)
+    | ArrCompr _ => raise Error("ArrCompr is not yet implemented", (0,0))
     | Let (dec, e1, (line, col)) =>
         let val (code1, vtable1) = compileDec dec vtable
             val code2 = compileExp e1 vtable1 place
@@ -660,7 +692,7 @@ structure CodeGen = struct
             ]
         in arr_code @ code
         end
-
+    | _ => raise Error("codeGen failed", (0,0))
   (* TODO TASK 1: add case for constant booleans (True/False). *)
 
   (* TODO TASK 1: add cases for Times, Divide, Negate, Not, And, Or.  Look at
@@ -742,7 +774,6 @@ structure CodeGen = struct
                in ([Mips.MOVE (vname, makeConst nextReg)]
                    @ code2, vtable2)
                end
-
   (* compile function declaration *)
   and compileFun (FunDec (fname, resty, args, exp, (line,col))) =
         let (* make a vtable from bound formal parameters,
@@ -913,5 +944,4 @@ structure CodeGen = struct
           Mips.LABEL "_heap_",
           Mips.SPACE "100000"]
     end
-
 end

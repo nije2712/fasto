@@ -12,6 +12,8 @@ fun calls caller callee graph =
 
 open Fasto.KnownTypes
 
+exception Error of string
+
 (* Remove duplicate elements in a list.  Quite slow - O(n^2) - but our
 lists here will be small. *)
 fun nub [] = []
@@ -52,6 +54,7 @@ fun expCalls e =
       | Negate (e, _) => expCalls e
       | Read _ => []
       | Write (e, _, _) => expCalls e
+      | _ => raise Error("Error in CallGraph")
 and fargCalls (Lambda (_, _, body, _)) = expCalls body
   | fargCalls (FunName s)              = [s]
 

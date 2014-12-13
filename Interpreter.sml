@@ -203,7 +203,7 @@ fun evalExp ( Constant (v,_), vtab, ftab ) = v
 (*
   | evalExp ( Negate(e1, pos), vtab, ftab ) =
         let val res1   = evalExp(e1, vtab, ftab)
-        in  IntVal ~res1
+        in  IntVal
         end
 
 
@@ -453,7 +453,7 @@ fun evalExp ( Constant (v,_), vtab, ftab ) = v
             | otherwise => raise Error("Write can be called only on basic and array(char) types ", p)
         in v
         end
-
+  | evalExp (_) = raise Error("Interpreter failed", (0,0))
   (* TODO TASK 1: add cases for Times, Divide, Negate, Not, And, Or.  Look at
   how Plus and Minus are implemented for inspiration.
    *)
